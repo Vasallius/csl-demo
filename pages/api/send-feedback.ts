@@ -151,7 +151,7 @@ export default async function handler(
       .from("nullifier_hash")
       .insert([{ nullifier: nullifierHash }])
 
-    // Handle error if occurred during inserting nullifier.
+    // Handle error if occurred during inserting nullifier. 
     if (errorNullifier) {
       console.error(errorNullifier)
       res.status(500).end()
