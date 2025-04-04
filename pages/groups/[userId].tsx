@@ -1,9 +1,10 @@
 import CreateGroupModal from "@/components/groups/CreateGroupModal"
-import { CreateGroupFormData, Group } from "@/types/group"
+import { CreateGroupFormData } from "@/types/group"
 import supabase from "@/utils/supabaseClient"
-import { ApiSdk } from "@bandada/api-sdk"
+import { ApiSdk, type Group as BandadaGroup } from "@bandada/api-sdk"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
+import { toast } from "react-hot-toast"
 
 // Initialize Bandada API SDK
 const apiSdk = new ApiSdk(process.env.NEXT_PUBLIC_BANDADA_API_URL)
@@ -17,7 +18,7 @@ export default function UserGroups() {
   const { userId } = router.query
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [groups, setGroups] = useState<Group[]>([])
+  const [groups, setGroups] = useState<BandadaGroup[]>([])
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
   useEffect(() => {
@@ -31,6 +32,7 @@ export default function UserGroups() {
           router.push("/login")
           return
         }
+        console.log(data)
 
         // Verify if the logged-in user matches the URL userId
         if (data.session.user.id !== userId) {
@@ -44,13 +46,14 @@ export default function UserGroups() {
         // Fetch group IDs associated with the user from your database
         const { data: userGroups, error } = await supabase
           .from("groups")
-          .select("id")
+          .select("*")
           .eq("user_id", data.session.user.id)
+
+        console.log("usergroups", userGroups)
 
         if (error) {
           console.error("Error fetching user groups:", error)
           // Use dummy data if there's an error
-          setDummyGroups()
           setLoading(false)
           return
         }
@@ -65,7 +68,7 @@ export default function UserGroups() {
           const allAdminGroups = await apiSdk.getGroupsByAdminId(ADMIN_ID)
 
           // Filter groups to only include those associated with the user
-          let filteredGroups: any[]
+          let filteredGroups: BandadaGroup[]
 
           if (userGroupIds.length > 0) {
             // If user has groups, filter the admin groups
@@ -78,30 +81,18 @@ export default function UserGroups() {
             filteredGroups = allAdminGroups
           }
 
-          // Transform Bandada groups to our format
-          const formattedGroups = filteredGroups.map((group) => ({
-            id: group.id,
-            name: group.name || "Unnamed Group",
-            description: group.description || "No description",
-            members: group.members?.length || 0,
-            formFields: [] // Initialize with empty form fields
-          }))
-
-          if (formattedGroups.length > 0) {
-            setGroups(formattedGroups)
+          if (filteredGroups.length > 0) {
+            setGroups(filteredGroups)
           } else {
             // If no groups after filtering, use dummy data
-            setDummyGroups()
           }
         } catch (bandadaError) {
           console.error("Error fetching groups from Bandada:", bandadaError)
           // Use dummy data if there's an error
-          setDummyGroups()
         }
       } catch (error) {
         console.error("Error in authentication check:", error)
         // Use dummy data if there's an error
-        setDummyGroups()
       } finally {
         setLoading(false)
       }
@@ -114,34 +105,56 @@ export default function UserGroups() {
   }, [router, userId])
 
   // Function to set dummy groups data for testing
-  const setDummyGroups = () => {
-    setGroups([
-      {
-        id: "1",
-        name: "Example Group 1",
-        description: "This is an example group",
-        members: 0,
-        formFields: []
-      },
-      {
-        id: "2",
-        name: "Example Group 2",
-        description: "Another example group",
-        members: 0,
-        formFields: []
-      }
-    ])
-  }
+  // const setDummyGroups = () => {
+  //   setGroups([
+  //     {
+  //       id: "1",
+  //       name: "Example Group 1",
+  //       description: "This is an example group",
+  //       members: []
+  //     },
+  //     {
+  //       id: "2",
+  //       name: "Example Group 2",
+  //       description: "Another example group",
+  //       members: []
+  //     }
+  //   ])
+  // }
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
     router.push("/login")
   }
 
-  const handleCreateGroup = (data: CreateGroupFormData) => {
-    console.log("Creating group:", data)
-    // TODO: Implement group creation
-    setIsCreateModalOpen(false)
+  const handleCreateGroup = async (data: CreateGroupFormData) => {
+    try {
+      const response = await fetch("/api/create-group", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data)
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to create group")
+      }
+
+      const result = await response.json()
+
+      // Add the new group to the state
+      setGroups((prev) => [...prev, result.group])
+
+      // Close the modal
+      setIsCreateModalOpen(false)
+
+      // Show success message
+      toast.success("Group created successfully!")
+    } catch (error) {
+      console.error("Error creating group:", error)
+      toast.error("Failed to create group. Please try again.")
+    }
   }
 
   if (loading) {
@@ -214,7 +227,7 @@ export default function UserGroups() {
                   {group.description}
                 </p>
                 <div className="text-sm text-gray-500">
-                  {group.members}
+                  {group.members.length}
                   <br />
                   members
                 </div>
