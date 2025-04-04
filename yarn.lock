@@ -49,18 +49,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bandada/api-sdk@npm:^2.5.0":
-  version: 2.5.0
-  resolution: "@bandada/api-sdk@npm:2.5.0"
+"@bandada/api-sdk@npm:^2.8.0":
+  version: 2.8.0
+  resolution: "@bandada/api-sdk@npm:2.8.0"
   dependencies:
-    "@bandada/utils": "npm:2.5.0"
-  checksum: 10/b723eb7f160854529007bdb9e8a9b06d7d3a3ac32fd5a2d87f9bb0c09bfa7d3fcf0d3e1bb555c4e11c683aac7afa8222382c644a7f45599368d03321aeb75ba6
+    "@bandada/utils": "npm:2.8.0"
+  checksum: 10/72a00783aa02af4a623ed226f006e45f8b4c73f4193e0c3780d236ed025e28f3c17c92410fcd4d2979b6728d38eeb4fcaa6c4f758872e00a186b34593d9b51fc
   languageName: node
   linkType: hard
 
-"@bandada/utils@npm:2.5.0":
-  version: 2.5.0
-  resolution: "@bandada/utils@npm:2.5.0"
+"@bandada/utils@npm:2.8.0":
+  version: 2.8.0
+  resolution: "@bandada/utils@npm:2.8.0"
   dependencies:
     "@ethersproject/abstract-signer": "npm:^5.7.0"
     "@ethersproject/address": "npm:^5.7.0"
@@ -69,7 +69,7 @@ __metadata:
     "@ethersproject/strings": "npm:^5.7.0"
     "@ethersproject/wallet": "npm:^5.7.0"
     axios: "npm:^1.3.3"
-  checksum: 10/9de70164bb97dbb6c2889494d1d8783fb2cb73a7bf2a9ba01b2b23db0577fceeb5e6d830a57bc75ce1d50e9c5574888564a01677039d10c5919dc34913f6f451
+  checksum: 10/4d772059656562c01c69856d8953fe016c6f467f4e49812eea96b1f6ad9675af8e2306fd4672dbb906a4cdbd0c97f04a029caf10bbb1fa45c67c3c25b7f61142
   languageName: node
   linkType: hard
 
@@ -1466,7 +1466,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "bandada-tutorial@workspace:."
   dependencies:
-    "@bandada/api-sdk": "npm:^2.5.0"
+    "@bandada/api-sdk": "npm:^2.8.0"
     "@semaphore-protocol/core": "npm:^4.7.1"
     "@supabase/supabase-js": "npm:^2.33.2"
     "@types/node": "npm:20.5.9"
