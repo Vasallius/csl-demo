@@ -1,5 +1,7 @@
+import CreateGroupModal from "@/components/groups/CreateGroupModal"
+import { CreateGroupFormData, Group } from "@/types/group"
 import supabase from "@/utils/supabaseClient"
-import { ApiSdk, Group as BandadaGroup } from "@bandada/api-sdk"
+import { ApiSdk } from "@bandada/api-sdk"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 
@@ -10,18 +12,13 @@ const apiSdk = new ApiSdk(process.env.NEXT_PUBLIC_BANDADA_API_URL)
 const ADMIN_ID =
   "0x6c5589644cfe9fc2b4e57882a446525221cfd44aa45cbf54d52ff0026afc286f"
 
-type Group = {
-  id: string
-  name: string
-  description: string
-  members: number
-}
-
-export default function Test() {
+export default function UserGroups() {
   const router = useRouter()
+  const { userId } = router.query
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [groups, setGroups] = useState<Group[]>([])
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
   useEffect(() => {
     // Check if user is authenticated and fetch groups
@@ -32,6 +29,13 @@ export default function Test() {
         if (!data.session) {
           // Redirect to login if not authenticated
           router.push("/login")
+          return
+        }
+
+        // Verify if the logged-in user matches the URL userId
+        if (data.session.user.id !== userId) {
+          // Redirect to their correct groups page if they're trying to access another user's groups
+          router.push(`/groups/${data.session.user.id}`)
           return
         }
 
@@ -61,7 +65,7 @@ export default function Test() {
           const allAdminGroups = await apiSdk.getGroupsByAdminId(ADMIN_ID)
 
           // Filter groups to only include those associated with the user
-          let filteredGroups: BandadaGroup[]
+          let filteredGroups: any[]
 
           if (userGroupIds.length > 0) {
             // If user has groups, filter the admin groups
@@ -79,7 +83,8 @@ export default function Test() {
             id: group.id,
             name: group.name || "Unnamed Group",
             description: group.description || "No description",
-            members: group.members?.length || 0
+            members: group.members?.length || 0,
+            formFields: [] // Initialize with empty form fields
           }))
 
           if (formattedGroups.length > 0) {
@@ -102,29 +107,28 @@ export default function Test() {
       }
     }
 
-    checkUserAndFetchGroups()
-  }, [router])
+    // Only run the effect if we have a userId from the route
+    if (userId) {
+      checkUserAndFetchGroups()
+    }
+  }, [router, userId])
 
   // Function to set dummy groups data for testing
   const setDummyGroups = () => {
     setGroups([
       {
         id: "1",
-        name: "sdfsafsa",
-        description: "asdfasdfasafs",
-        members: 0
+        name: "Example Group 1",
+        description: "This is an example group",
+        members: 0,
+        formFields: []
       },
       {
         id: "2",
-        name: "magic2",
-        description: "testttttttt",
-        members: 0
-      },
-      {
-        id: "3",
-        name: "test",
-        description: "amazingggg",
-        members: 0
+        name: "Example Group 2",
+        description: "Another example group",
+        members: 0,
+        formFields: []
       }
     ])
   }
@@ -134,10 +138,10 @@ export default function Test() {
     router.push("/login")
   }
 
-  const handleCreateGroup = () => {
-    // Navigate to create group page (to be implemented)
-    console.log("Create group clicked")
-    // router.push("/create-group")
+  const handleCreateGroup = (data: CreateGroupFormData) => {
+    console.log("Creating group:", data)
+    // TODO: Implement group creation
+    setIsCreateModalOpen(false)
   }
 
   if (loading) {
@@ -168,7 +172,7 @@ export default function Test() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* Create Group Card */}
             <div
-              onClick={handleCreateGroup}
+              onClick={() => setIsCreateModalOpen(true)}
               className="bg-white rounded-lg p-6 shadow-md cursor-pointer hover:shadow-lg transition-shadow duration-200 flex flex-col items-center justify-center min-h-[200px]"
             >
               <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center mb-4">
@@ -219,6 +223,13 @@ export default function Test() {
           </div>
         </div>
       </div>
+
+      {isCreateModalOpen && (
+        <CreateGroupModal
+          onClose={() => setIsCreateModalOpen(false)}
+          onSubmit={handleCreateGroup}
+        />
+      )}
     </div>
   )
 }

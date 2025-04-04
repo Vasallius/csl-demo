@@ -54,7 +54,7 @@ export default function Login() {
           }
 
           if (retryData.user) {
-            router.push("/test")
+            router.push(`/groups/${retryData.user.id}`)
             return
           }
         }
@@ -63,8 +63,8 @@ export default function Login() {
       }
 
       if (data.user) {
-        // Redirect to test page on successful login
-        router.push("/test")
+        // Redirect to user's groups page
+        router.push(`/groups/${data.user.id}`)
       }
     } catch (error: any) {
       setError(error.message || "An error occurred during login")
@@ -106,7 +106,7 @@ export default function Login() {
         if (signInError) {
           setMessage("Account created! Please try logging in.")
         } else if (signInData.user) {
-          router.push("/test")
+          router.push(`/groups/${signInData.user.id}`)
         }
       }
     } catch (error: any) {
