@@ -14,12 +14,20 @@ export default async function handler(
   }
 
   try {
-    // Get the authenticated user
-    const {
-      data: { session }
-    } = await supabase.auth.getSession()
+    // Get the auth token from the request header
+    const authHeader = req.headers.authorization
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Missing auth token" })
+    }
+    const token = authHeader.split(" ")[1]
 
-    if (!session) {
+    // Verify the token and get user data
+    const {
+      data: { user },
+      error: authError
+    } = await supabase.auth.getUser(token)
+
+    if (authError || !user) {
       return res.status(401).json({ message: "Unauthorized" })
     }
 
@@ -38,20 +46,16 @@ export default async function handler(
       process.env.NEXT_PUBLIC_BANDADA_ADMIN_API_KEY!
     )
 
+    console.log("group", group)
+
     // Store everything in a single row with JSON columns
     const { data: newGroup, error } = await supabase
       .from("groups")
       .insert({
         id: group.id,
-        user_id: session.user.id,
+        user_id: user.id,
         form_fields: formData.formFields,
-        group_details: {
-          name: formData.name,
-          description: formData.description,
-          created_at: new Date().toISOString(),
-          treeDepth: groupCreateDetails.treeDepth,
-          fingerprintDuration: groupCreateDetails.fingerprintDuration
-        }
+        details: group
       })
       .select()
       .single()
@@ -60,7 +64,7 @@ export default async function handler(
       throw error
     }
 
-    return res.status(200).json({ group: newGroup })
+    return res.status(200).json({ group: group })
   } catch (error: any) {
     console.error("Error creating group:", error)
     return res.status(500).json({

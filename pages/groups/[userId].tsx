@@ -11,7 +11,7 @@ const apiSdk = new ApiSdk(process.env.NEXT_PUBLIC_BANDADA_API_URL)
 
 // Constant admin ID for now
 const ADMIN_ID =
-  "0x6c5589644cfe9fc2b4e57882a446525221cfd44aa45cbf54d52ff0026afc286f"
+  "0x8ecabac8f4348aa9ca192ac200e1ac7c249a55c36a995a99ef49694a885ccc7d"
 
 export default function UserGroups() {
   const router = useRouter()
@@ -32,7 +32,6 @@ export default function UserGroups() {
           router.push("/login")
           return
         }
-        console.log(data)
 
         // Verify if the logged-in user matches the URL userId
         if (data.session.user.id !== userId) {
@@ -43,56 +42,31 @@ export default function UserGroups() {
 
         setUser(data.session.user)
 
-        // Fetch group IDs associated with the user from your database
+        // Fetch groups associated with the user from your database
         const { data: userGroups, error } = await supabase
           .from("groups")
           .select("*")
           .eq("user_id", data.session.user.id)
 
-        console.log("usergroups", userGroups)
-
         if (error) {
           console.error("Error fetching user groups:", error)
-          // Use dummy data if there's an error
           setLoading(false)
           return
         }
 
-        // Extract user's group IDs
-        const userGroupIds = userGroups
-          ? userGroups.map((group) => group.id)
-          : []
-
-        try {
-          // Fetch all groups by admin ID
-          const allAdminGroups = await apiSdk.getGroupsByAdminId(ADMIN_ID)
-
-          // Filter groups to only include those associated with the user
-          let filteredGroups: BandadaGroup[]
-
-          if (userGroupIds.length > 0) {
-            // If user has groups, filter the admin groups
-            filteredGroups = allAdminGroups.filter((group) =>
-              userGroupIds.includes(group.id)
-            )
-          } else {
-            // If no user groups found, just use all admin groups for now
-            // In a production app, you might want to show an empty state instead
-            filteredGroups = allAdminGroups
-          }
-
-          if (filteredGroups.length > 0) {
-            setGroups(filteredGroups)
-          } else {
-            // If no groups after filtering, use dummy data
-          }
-        } catch (bandadaError) {
-          console.error("Error fetching groups from Bandada:", bandadaError)
-          // Use dummy data if there's an error
-        }
+        // Map the groups to include the Bandada details stored in the details column
+        const groupsWithDetails = userGroups.map((group) => {
+          // If details is stored as a string, parse it
+          const details =
+            typeof group.details === "string"
+              ? JSON.parse(group.details)
+              : group.details
+          return details
+        })
+        console.log("groupsWithDetails", groupsWithDetails)
+        setGroups(groupsWithDetails)
       } catch (error) {
         console.error("Error in authentication check:", error)
-        // Use dummy data if there's an error
       } finally {
         setLoading(false)
       }
@@ -128,11 +102,20 @@ export default function UserGroups() {
   }
 
   const handleCreateGroup = async (data: CreateGroupFormData) => {
+    console.log("data", data)
     try {
+      const {
+        data: { session }
+      } = await supabase.auth.getSession()
+      if (!session) {
+        throw new Error("No session found")
+      }
+
       const response = await fetch("/api/create-group", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`
         },
         body: JSON.stringify(data)
       })
@@ -142,8 +125,9 @@ export default function UserGroups() {
       }
 
       const result = await response.json()
+      console.log("result", result)
 
-      // Add the new group to the state
+      // Add the new group's details to the state
       setGroups((prev) => [...prev, result.group])
 
       // Close the modal
