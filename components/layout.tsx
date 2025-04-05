@@ -1,6 +1,5 @@
-import Header from "./header"
-import Footer from "./footer"
 import Head from "next/head"
+import Header from "./header"
 
 export default function Layout({ children }: any) {
   return (
@@ -17,7 +16,6 @@ export default function Layout({ children }: any) {
       <div className="flex flex-col min-h-screen text-slate-900">
         <Header />
         <main className="mb-auto px-2">{children}</main>
-        <Footer />
       </div>
     </>
   )

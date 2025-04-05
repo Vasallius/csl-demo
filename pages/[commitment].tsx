@@ -1,8 +1,8 @@
-import Divider from "@/components/divider"
 import { ApiSdk } from "@bandada/api-sdk"
 import { Identity } from "@semaphore-protocol/core"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
+import { toast } from "react-hot-toast"
 
 // Initialize Bandada API SDK
 const apiSdk = new ApiSdk(process.env.NEXT_PUBLIC_BANDADA_API_URL)
@@ -13,6 +13,11 @@ type Group = {
   description: string
   memberCount: number
 }
+
+// Simple styled divider for this page
+const CyberDivider = () => (
+  <hr className="my-5 h-px border-t-0 bg-bandada-gold/30" />
+)
 
 export default function MemberGroups() {
   const router = useRouter()
@@ -30,27 +35,22 @@ export default function MemberGroups() {
   const localStorageTag = process.env.NEXT_PUBLIC_LOCAL_STORAGE_TAG!
 
   useEffect(() => {
-    // Only proceed if commitment is available from the URL
     if (!commitment) return
 
-    // Load identity from local storage
     const identityString = localStorage.getItem(localStorageTag)
     if (identityString) {
       const loadedIdentity = new Identity(identityString)
 
-      // Verify that the URL commitment matches the loaded identity
       if (loadedIdentity.commitment.toString() === commitment) {
         setIdentity(loadedIdentity)
         setIdentityVerified(true)
-
-        // Fetch groups the user is a member of
         fetchMemberGroups(commitment as string)
       } else {
-        // Redirect to main page if commitments don't match
+        toast.error("Identity mismatch. Redirecting...")
         router.push("/")
       }
     } else {
-      // Redirect to identity creation if no identity exists
+      toast.error("No identity found. Redirecting...")
       router.push("/")
     }
   }, [commitment, localStorageTag, router])
@@ -58,29 +58,19 @@ export default function MemberGroups() {
   const fetchMemberGroups = async (memberCommitment: string) => {
     setLoading(true)
     try {
-      // Here you would implement the API call to fetch groups where the user is a member
-      // Example (replace with actual implementation):
-      // const fetchedGroups = await apiSdk.getMemberGroups(memberCommitment)
-
-      // For now, we'll use mock data
-      const mockGroups: Group[] = [
-        {
-          id: "group-1",
-          name: "Community Members",
-          description: "A group for all community members",
-          memberCount: 156
-        },
-        {
-          id: "group-2",
-          name: "Contributors",
-          description: "Active project contributors",
-          memberCount: 42
-        }
-      ]
-
-      setMemberGroups(mockGroups)
+      const bandadaGroups = await apiSdk.getGroupsByMemberId(memberCommitment)
+      const transformedGroups: Group[] = bandadaGroups.map((group) => ({
+        id: group.id,
+        name: group.name,
+        description: group.description || "No description available",
+        memberCount: group.members?.length || 0 // Note: members might not always be populated depending on API version/call
+        // Consider fetching member count separately if needed: await apiSdk.getGroup(group.id)
+      }))
+      setMemberGroups(transformedGroups)
     } catch (error) {
       console.error("Error fetching member groups:", error)
+      toast.error("Could not fetch your groups.")
+      setMemberGroups([])
     } finally {
       setLoading(false)
     }
@@ -90,149 +80,178 @@ export default function MemberGroups() {
     if (!identity || !inviteCode) return
 
     setJoinLoading(true)
+    const toastId = toast.loading("Joining group...")
     try {
-      // Here you would implement the API call to join the group using the SDK
-      // Example (replace with actual implementation):
-      // await apiSdk.joinGroupWithInvite(inviteCode, identity.commitment.toString())
+      // Get invite details first to ensure it's valid and get group ID
+      const invite = await apiSdk.getInvite(inviteCode)
+      if (!invite || !invite.group || !invite.group.id) {
+        throw new Error("Invalid invite code or group not found")
+      }
+      const groupId = invite.group.id
 
-      // After successful join, refresh the groups list
-      await fetchMemberGroups(identity.commitment.toString())
+      // Now attempt to join
+      await apiSdk.addMemberByInviteCode(
+        groupId,
+        identity.commitment.toString(),
+        inviteCode
+      )
 
-      // Reset the invite code input
+      await fetchMemberGroups(identity.commitment.toString()) // Refresh list
       setInviteCode("")
       setShowInviteInput(false)
-
-      // Show success message
-      alert("Successfully joined the group!")
-    } catch (error) {
+      toast.success("Successfully joined the group!", { id: toastId })
+    } catch (error: any) {
       console.error("Error joining group:", error)
-      alert(
-        "Failed to join group. Please check your invite code and try again."
-      )
+      const message =
+        error?.response?.data?.message ||
+        error.message ||
+        "Failed to join group. Check invite code."
+      toast.error(message, { id: toastId })
     } finally {
       setJoinLoading(false)
     }
   }
 
   const navigateToGroup = (groupId: string) => {
-    router.push(`/groups/${groupId}`)
+    // Decide where clicking a group should lead. To a generic group page?
+    // router.push(`/groups/${groupId}`)
+    // For now, let's just log it or perhaps show details if we had them
+    console.log("Navigate to group:", groupId)
+    toast(`Group ID: ${groupId} (Navigation placeholder)`, {
+      icon: "ℹ️" // Optional: Add an info icon
+    })
   }
 
-  // If identity verification is still in progress, show loading
+  // Loading state for initial identity verification
   if (!identityVerified && commitment) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
-          <p className="mt-2 text-slate-600">Verifying identity...</p>
+      <div className="flex justify-center items-center min-h-[calc(100vh-200px)] circuit-pattern">
+        <div className="text-center p-10 bg-bandada-black-light rounded-md border border-bandada-gold/30">
+          <div className="cyber-spinner mx-auto"></div>
+          <p className="mt-4 text-bandada-gold-light">Verifying identity...</p>
         </div>
       </div>
     )
   }
 
+  // Main component render
   return (
-    <div>
-      <div className="flex justify-center items-center">
-        <h1 className="text-3xl font-semibold text-slate-700">My Groups</h1>
-      </div>
+    <div className="circuit-pattern min-h-[calc(100vh-200px)] py-10">
+      <div className="container mx-auto px-4 max-w-3xl">
+        <h1 className="text-4xl font-bold text-center text-bandada-gold mb-6">
+          My Groups
+        </h1>
 
-      <div className="flex justify-center items-center mt-10">
-        <span className="lg:w-2/5 md:w-2/4 w-full">
-          <div>
-            These are the Bandada groups you are a member of. You can
-            participate in group activities and prove your membership
-            anonymously.
-          </div>
-          <Divider />
-        </span>
-      </div>
+        <div className="text-center text-bandada-gold-light mb-8 max-w-xl mx-auto">
+          These are the Bandada groups you are a member of. Participate in group
+          activities and prove your membership anonymously.
+        </div>
+        <CyberDivider />
 
-      <div className="flex justify-center items-center mt-5">
-        <div className="lg:w-2/5 md:w-2/4 w-full">
+        <div className="mt-8">
           <div className="flex justify-between items-center mb-5">
-            <div className="text-2xl font-semibold text-slate-700">
-              Your Groups
-            </div>
+            <h2 className="text-2xl font-semibold text-bandada-gold">
+              Your Groups ({memberGroups.length})
+            </h2>
             <button
-              className="px-4 py-2 text-sm font-medium rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700"
+              className="cyber-btn text-sm" // Adjusted button style
               onClick={() => setShowInviteInput(!showInviteInput)}
+              aria-expanded={showInviteInput}
             >
-              Join with Invite
+              {showInviteInput ? "Cancel Join" : "Join with Invite"}
             </button>
           </div>
 
           {showInviteInput && (
-            <div className="mb-5 p-4 border border-slate-300 rounded-md">
-              <div className="flex space-x-2">
+            <div className="cyber-card mb-6 p-5">
+              <div className="flex flex-col sm:flex-row sm:space-x-2 space-y-2 sm:space-y-0">
                 <input
                   type="text"
                   value={inviteCode}
                   onChange={(e) => setInviteCode(e.target.value)}
-                  className="flex-1 p-2 border border-slate-300 rounded-md"
+                  className="cyber-input flex-1" // Use cyber-input style
                   placeholder="Enter invite code"
                   disabled={joinLoading}
+                  aria-label="Invite Code"
                 />
                 <button
-                  className="px-4 py-2 font-medium rounded-md bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+                  className="cyber-btn" // Use cyber-btn style
                   onClick={handleJoinWithInvite}
                   disabled={!inviteCode || joinLoading}
                 >
-                  {joinLoading ? "Joining..." : "Join"}
+                  {joinLoading ? (
+                    <>
+                      <span className="loader mr-2"></span>{" "}
+                      {/* Use adapted loader */}
+                      Joining...
+                    </>
+                  ) : (
+                    "Join Group"
+                  )}
                 </button>
               </div>
             </div>
           )}
 
           {loading ? (
-            <div className="text-center py-10">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
-              <p className="mt-2 text-slate-600">Loading your groups...</p>
+            <div className="text-center py-16">
+              <div className="cyber-spinner mx-auto"></div>
+              <p className="mt-3 text-bandada-gold-light">
+                Loading your groups...
+              </p>
             </div>
           ) : memberGroups.length > 0 ? (
             <div className="space-y-4">
               {memberGroups.map((group) => (
                 <div
                   key={group.id}
-                  className="border border-slate-300 rounded-md p-4 hover:border-blue-400 cursor-pointer"
+                  className="cyber-card cursor-pointer" // Use cyber-card style
                   onClick={() => navigateToGroup(group.id)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyPress={(e) =>
+                    e.key === "Enter" && navigateToGroup(group.id)
+                  } // Accessibility
                 >
-                  <h3 className="text-xl font-medium text-slate-700">
+                  <h3 className="text-xl font-bold text-bandada-gold">
                     {group.name}
                   </h3>
-                  <p className="text-slate-600 mt-1">{group.description}</p>
-                  <p className="text-sm text-slate-500 mt-2">
+                  <p className="text-bandada-gold-light mt-1 text-sm">
+                    {group.description}
+                  </p>
+                  <p className="text-xs text-bandada-gold/70 mt-2">
                     {group.memberCount} members
                   </p>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-10 border border-dashed border-slate-300 rounded-md">
-              <p className="text-slate-600">
-                You haven&apos;t joined any groups yet. Use an invite code to
-                join a group.
+            <div className="text-center py-12 border border-dashed border-bandada-gold/50 rounded-md circuit-pattern">
+              <p className="text-bandada-gold-light">
+                You haven&apos;t joined any groups yet.
+              </p>
+              <p className="text-bandada-gold/80 text-sm mt-1">
+                Use an invite code above to join a group.
               </p>
             </div>
           )}
         </div>
-      </div>
 
-      <div className="flex justify-center items-center mt-10">
-        <div className="lg:w-2/5 md:w-2/4 w-full">
-          <div className="flex justify-between">
-            <button
-              className="px-4 py-2 text-sm font-medium rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700"
-              onClick={() => router.push("/")}
-            >
-              Back to Identity
-            </button>
-            <button
-              className="px-4 py-2 text-sm font-medium rounded-md bg-blue-600 hover:bg-blue-700 text-white"
-              onClick={() => router.push("/groups")}
-            >
-              Explore Groups
-            </button>
-          </div>
+        <CyberDivider />
+
+        <div className="mt-8 flex flex-col sm:flex-row justify-between space-y-3 sm:space-y-0">
+          <button
+            className="cyber-btn-secondary w-full sm:w-auto" // Secondary style for back
+            onClick={() => router.push("/")}
+          >
+            Back to Identity
+          </button>
+          <button
+            className="cyber-btn w-full sm:w-auto" // Primary style
+            onClick={() => router.push("/groups")} // Navigate to a page showing all available groups
+          >
+            Explore All Groups
+          </button>
         </div>
       </div>
     </div>
