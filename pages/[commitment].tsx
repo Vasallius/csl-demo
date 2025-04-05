@@ -59,6 +59,7 @@ export default function MemberGroups() {
     setLoading(true)
     try {
       const bandadaGroups = await apiSdk.getGroupsByMemberId(memberCommitment)
+      console.log("bandadaGroups", bandadaGroups)
       const transformedGroups: Group[] = bandadaGroups.map((group) => ({
         id: group.id,
         name: group.name,
