@@ -17,7 +17,7 @@ const ADMIN_ID =
 
 // Simple styled divider for this page
 const CyberDivider = () => (
-  <hr className="my-5 h-px border-t-0 bg-bandada-gold/30" />
+  <div className="h-px w-full bg-gradient-to-r from-transparent via-bandada-gold/70 to-transparent my-6"></div>
 )
 
 export default function UserGroups() {
@@ -166,28 +166,32 @@ export default function UserGroups() {
 
   if (loading && groups.length === 0) {
     return (
-      <div className="flex justify-center items-center min-h-[calc(100vh-200px)] circuit-pattern">
-        <div className="text-center p-10 bg-bandada-black-light rounded-md border border-bandada-gold/30">
-          <div className="cyber-spinner mx-auto"></div>
-          <p className="mt-4 text-bandada-gold-light">Loading your groups...</p>
+      <div className="flex justify-center items-center min-h-[calc(100vh-200px)] bg-bandada-black">
+        <div className="text-center p-10 bg-black/80 rounded-md border border-bandada-gold/50">
+          <div className="inline-block animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-bandada-gold mx-auto"></div>
+          <p className="mt-4 text-bandada-gold font-mono">
+            Loading your groups...
+          </p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="circuit-pattern min-h-[calc(100vh-200px)] py-10">
+    <div className="bg-bandada-black min-h-[calc(100vh-200px)] py-10">
       <div className="container mx-auto px-4 max-w-5xl">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
-          <h1 className="text-4xl font-bold text-bandada-gold mb-4 sm:mb-0">
+          <h1 className="text-4xl font-bold text-bandada-gold mb-4 sm:mb-0 font-mono">
             My Groups
           </h1>
           <button
             onClick={handleSignOut}
-            className="cyber-btn cyber-btn-secondary text-sm"
+            className="bg-black hover:bg-bandada-gray-dark text-bandada-gold border border-bandada-gold/50 font-medium rounded-md px-4 py-2 transition-colors duration-200 font-mono"
             disabled={loading}
           >
-            {loading ? <span className="loader mr-2"></span> : null}
+            {loading ? (
+              <span className="inline-block animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-bandada-gold mr-2"></span>
+            ) : null}
             Sign Out
           </button>
         </div>
@@ -198,7 +202,7 @@ export default function UserGroups() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div
               onClick={() => setIsCreateModalOpen(true)}
-              className="cyber-card cursor-pointer hover:border-bandada-gold-light hover:shadow-[0_0_20px_rgba(244,215,125,0.4)] flex flex-col items-center justify-center min-h-[220px] text-center p-6 transition-all duration-300 group"
+              className="bg-black/80 border border-bandada-gold/50 hover:border-bandada-gold hover:shadow-[0_0_20px_rgba(244,215,125,0.4)] rounded-md cursor-pointer flex flex-col items-center justify-center min-h-[220px] text-center p-6 transition-all duration-300 group"
             >
               <div className="w-16 h-16 rounded-full bg-bandada-gold/10 border border-bandada-gold/50 flex items-center justify-center mb-4 group-hover:bg-bandada-gold/20 group-hover:border-bandada-gold transition-all duration-300">
                 <svg
@@ -217,10 +221,10 @@ export default function UserGroups() {
                   <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-bandada-gold group-hover:text-bandada-gold-light transition-colors duration-300">
+              <h3 className="text-lg font-medium text-bandada-gold group-hover:text-gold-light transition-colors duration-300 font-mono">
                 Create New Group
               </h3>
-              <p className="text-sm text-bandada-gold/70 mt-1">
+              <p className="text-white mt-1 font-mono">
                 Start a new off-chain group
               </p>
             </div>
@@ -228,21 +232,21 @@ export default function UserGroups() {
             {groups.map((group) => (
               <div
                 key={group.id}
-                className="cyber-card flex flex-col justify-between min-h-[220px] p-6"
+                className="bg-black/80 border border-bandada-gold/50 hover:border-bandada-gold hover:shadow-[0_0_15px_rgba(244,215,125,0.3)] rounded-md flex flex-col justify-between min-h-[220px] p-6 transition-all duration-300"
               >
                 <div>
                   <div className="mb-3">
-                    <span className="inline-block bg-bandada-gray text-bandada-gold-light text-xs px-2 py-1 rounded-full border border-bandada-gold/30">
+                    <span className="inline-block bg-bandada-black text-bandada-gold text-xs px-2 py-1 rounded-full border border-bandada-gold/50 font-mono">
                       off-chain
                     </span>
                   </div>
-                  <h3 className="text-xl font-bold text-bandada-gold mb-1">
+                  <h3 className="text-xl font-bold text-bandada-gold mb-1 font-mono">
                     {group.name}
                   </h3>
-                  <p className="text-sm text-bandada-gold-light mb-3 flex-grow">
+                  <p className="text-white mb-3 flex-grow font-mono">
                     {group.description || "No description provided."}
                   </p>
-                  <div className="text-sm text-bandada-gold/80 mb-4">
+                  <div className="text-bandada-gold/80 mb-4 font-mono">
                     {group.members?.length ?? "N/A"} members
                   </div>
                 </div>
@@ -254,11 +258,11 @@ export default function UserGroups() {
             ))}
 
             {!loading && groups.length === 0 && (
-              <div className="md:col-span-2 lg:col-span-3 text-center py-12 border border-dashed border-bandada-gold/50 rounded-md circuit-pattern">
-                <p className="text-bandada-gold-light">
+              <div className="md:col-span-2 lg:col-span-3 text-center py-12 border border-dashed border-bandada-gold/50 rounded-md bg-black/60">
+                <p className="text-bandada-gold font-mono">
                   You haven&apos;t created or joined any groups yet.
                 </p>
-                <p className="text-bandada-gold/80 text-sm mt-1">
+                <p className="text-white mt-1 font-mono">
                   Click the &apos;+&apos; card to create your first group.
                 </p>
               </div>
