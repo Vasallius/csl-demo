@@ -1,4 +1,5 @@
 import CreateGroupModal from "@/components/groups/CreateGroupModal"
+import InviteButton from "@/components/InviteButton"
 import { CreateGroupFormData } from "@/types/group"
 import supabase from "@/utils/supabaseClient"
 import { ApiSdk, type Group as BandadaGroup } from "@bandada/api-sdk"
@@ -210,11 +211,13 @@ export default function UserGroups() {
                 <p className="text-sm text-gray-500 mb-4">
                   {group.description}
                 </p>
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-gray-500 mb-4">
                   {group.members.length}
                   <br />
                   members
                 </div>
+
+                <InviteButton groupId={group.id} />
               </div>
             ))}
           </div>

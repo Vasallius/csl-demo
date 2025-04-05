@@ -29,6 +29,22 @@ export async function getGroup(groupId: string): Promise<Group | null> {
 }
 
 /**
+ * Function to create a new group invite.
+ * @param groupId The group identifier.
+ * @param apiKey The admin API key.
+ * @returns The created invite (if successful).
+ */
+export async function createInvite(groupId: string, apiKey: string) {
+  try {
+    // Create an invite using the Bandada API SDK.
+    return await bandadaApi.createInvite(groupId, apiKey)
+  } catch (error: any) {
+    console.error(error)
+    throw error
+  }
+}
+
+/**
  * Function to add a member to a group using an API key.
  * @param groupId The group identifier.
  * @param memberId The member identifier.
