@@ -134,3 +134,69 @@ export function getCredentialGroupJoinUrl(
     return null
   }
 }
+
+/**
+ * Function to add a member to a group using an invite code.
+ * @param groupId The group identifier.
+ * @param memberId The member identifier (commitment).
+ * @param inviteCode The invite code.
+ * @returns A promise that resolves when the member is added.
+ */
+export async function joinGroupWithInvite(
+  groupId: string,
+  memberId: string,
+  inviteCode: string
+): Promise<void> {
+  try {
+    // Join the group using the Bandada API SDK
+    await bandadaApi.addMemberByInviteCode(groupId, memberId, inviteCode)
+  } catch (error: any) {
+    console.error("Error joining group with invite:", error)
+    throw error
+  }
+}
+
+/**
+ * Function to get invite details from an invite code.
+ * @param inviteCode The invite code.
+ * @returns A promise that resolves to the invite details.
+ */
+export async function getInviteDetails(inviteCode: string): Promise<any> {
+  try {
+    const invite = await bandadaApi.getInvite(inviteCode)
+    return invite
+  } catch (error: any) {
+    console.error("Error getting invite details:", error)
+    throw error
+  }
+}
+
+/**
+ * Function to get multiple groups by their IDs.
+ * @param groupIds Array of group IDs to fetch.
+ * @returns A promise that resolves to an array of group details.
+ */
+export async function getGroupsByIds(groupIds: string[]): Promise<any[]> {
+  try {
+    const groups = await bandadaApi.getGroupsByGroupIds(groupIds)
+    return groups
+  } catch (error: any) {
+    console.error("Error fetching groups by IDs:", error)
+    throw error
+  }
+}
+
+/**
+ * Function to get a single group by ID.
+ * @param groupId The group ID to fetch.
+ * @returns A promise that resolves to the group details.
+ */
+export async function getGroupById(groupId: string): Promise<any> {
+  try {
+    const groups = await getGroupsByIds([groupId])
+    return groups[0] || null
+  } catch (error: any) {
+    console.error(`Error fetching group ${groupId}:`, error)
+    throw error
+  }
+}

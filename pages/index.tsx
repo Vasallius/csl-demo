@@ -55,43 +55,6 @@ export default function Home() {
     }
   }
 
-  const renderIdentity = () => {
-    return (
-      <div className="lg:w-2/5 md:w-2/4 w-full">
-        <div className="flex justify-between items-center mb-3">
-          <div className="text-2xl font-semibold text-slate-700">Identity</div>
-          <div>
-            <button
-              className="flex justify-center items-center w-auto space-x-1 verify-btn text-lg font-medium rounded-md bg-gradient-to-r text-slate-700"
-              onClick={createIdentity}
-            >
-              <span>New</span>
-            </button>
-          </div>
-        </div>
-
-        {_identity && (
-          <div className="flex justify-center items-center">
-            <div className="overflow-auto border-2 p-7 border-slate-300 space-y-3">
-              {/* Display identity details: Trapdoor, Nullifier, Commitment */}
-              <div>
-                <b>Private Key (base64)</b>:<br />
-                {_identity.export()}
-              </div>
-              <div>
-                <b>Public Key</b>:<br /> [{_identity?.publicKey[0].toString()},{" "}
-                {_identity.publicKey[1].toString()}]
-              </div>
-              <div>
-                <b>Commitment</b>:<br /> {_identity.commitment.toString()}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    )
-  }
-
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">

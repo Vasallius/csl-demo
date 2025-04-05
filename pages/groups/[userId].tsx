@@ -1,6 +1,7 @@
 import CreateGroupModal from "@/components/groups/CreateGroupModal"
 import InviteButton from "@/components/InviteButton"
 import { CreateGroupFormData } from "@/types/group"
+import { getGroupsByIds } from "@/utils/bandadaApi"
 import supabase from "@/utils/supabaseClient"
 import { ApiSdk, type Group as BandadaGroup } from "@bandada/api-sdk"
 import { useRouter } from "next/router"
@@ -46,7 +47,7 @@ export default function UserGroups() {
         // Fetch groups associated with the user from your database
         const { data: userGroups, error } = await supabase
           .from("groups")
-          .select("*")
+          .select("id")
           .eq("user_id", data.session.user.id)
 
         if (error) {
@@ -55,17 +56,14 @@ export default function UserGroups() {
           return
         }
 
-        // Map the groups to include the Bandada details stored in the details column
-        const groupsWithDetails = userGroups.map((group) => {
-          // If details is stored as a string, parse it
-          const details =
-            typeof group.details === "string"
-              ? JSON.parse(group.details)
-              : group.details
-          return details
-        })
-        console.log("groupsWithDetails", groupsWithDetails)
-        setGroups(groupsWithDetails)
+        if (userGroups && userGroups.length > 0) {
+          // Extract just the IDs
+          const groupIds = userGroups.map((group) => group.id)
+
+          // Fetch fresh group data from Bandada API
+          const freshGroups = await getGroupsByIds(groupIds)
+          setGroups(freshGroups)
+        }
       } catch (error) {
         console.error("Error in authentication check:", error)
       } finally {

@@ -10,7 +10,7 @@ const apiSdk = new ApiSdk(process.env.NEXT_PUBLIC_BANDADA_API_URL)
 
 export default function JoinGroup() {
   const router = useRouter()
-  const { inviteCode } = router.query
+  const { inviteCode, groupId } = router.query
 
   const [identity, setIdentity] = useState<Identity>()
   const [loading, setLoading] = useState<boolean>(false)
@@ -47,13 +47,25 @@ export default function JoinGroup() {
     setLoading(true)
 
     try {
-      // Here you would implement the API call to join the group using the SDK
-      // Example (replace with actual implementation):
-      // const result = await apiSdk.joinGroupWithInvite(inviteCode.toString(), identity.commitment.toString())
+      // Call our API endpoint to join the group
+      const response = await fetch("/api/join-with-invite", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          commitment: identity.commitment.toString(),
+          inviteCode: inviteCode
+        })
+      })
 
-      // For now, we'll simulate a successful join after a delay
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || "Failed to join group")
+      }
 
+      const data = await response.json()
+      console.log(data)
       setJoinStatus("success")
 
       // After successful join, redirect to the member's groups page
