@@ -60,8 +60,8 @@ export default function Home() {
 
   const renderIdentity = () => {
     return (
-      <div className="lg:w-2/5 md:w-2/4 w-full">
-        <div className="flex justify-between items-center mb-3">
+      <div className="w-full">
+        <div className="flex justify-between items-center mb-4">
           <div className="text-2xl font-mono font-semibold text-bandada-gold">
             Identity
           </div>
@@ -77,24 +77,24 @@ export default function Home() {
 
         {identity && (
           <div className="flex justify-center items-center">
-            <div className="w-full overflow-auto border border-bandada-gold/30 bg-black p-5 rounded-md space-y-4 font-mono">
+            <div className="w-full overflow-auto border border-bandada-gold/50 bg-black/80 p-5 rounded-md space-y-4 font-mono">
               <div>
                 <p className="text-bandada-gold font-bold mb-1">
                   Private Key (base64):
                 </p>
-                <p className="text-bandada-gray-light break-all bg-bandada-black p-2 rounded border border-bandada-gray-dark">
+                <p className="text-white break-all bg-black/60 p-2 rounded border border-bandada-gold/30">
                   {identity.export()}
                 </p>
               </div>
               <div>
                 <p className="text-bandada-gold font-bold mb-1">Public Key:</p>
-                <p className="text-bandada-gray-light break-all bg-bandada-black p-2 rounded border border-bandada-gray-dark">
+                <p className="text-white break-all bg-black/60 p-2 rounded border border-bandada-gold/30">
                   [{identity.publicKey[1].toString()}]
                 </p>
               </div>
               <div>
                 <p className="text-bandada-gold font-bold mb-1">Commitment:</p>
-                <p className="text-bandada-gray-light break-all bg-bandada-black p-2 rounded border border-bandada-gray-dark">
+                <p className="text-white break-all bg-black/60 p-2 rounded border border-bandada-gold/30">
                   {identity.commitment.toString()}
                 </p>
               </div>
@@ -117,54 +117,66 @@ export default function Home() {
   }
 
   return (
-    <div className="bg-bandada-black">
-      <div>
-        <div className="flex justify-center items-center">
-          <h1 className="text-3xl font-semibold text-bandada-gold font-mono">
+    <div className="bg-bandada-black min-h-screen flex flex-col items-center py-12 px-4">
+      <div className="max-w-3xl w-full">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-bandada-gold font-mono">
             Identities
           </h1>
         </div>
 
         {inviteCode && !identity && (
-          <div className="flex justify-center items-center mt-5">
-            <div className="lg:w-2/5 md:w-2/4 w-full p-4 bg-black border border-bandada-gold/50 rounded-md">
-              <p className="text-bandada-gold font-mono">
-                <span className="font-bold">Group Invite Detected!</span> Create
-                your identity to join the group.
-              </p>
-            </div>
+          <div className="mb-8 p-4 bg-black/80 border-2 border-bandada-gold rounded-md">
+            <p className="text-white font-mono flex items-center">
+              <span className="text-bandada-gold mr-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </span>
+              <span className="font-bold text-bandada-gold">
+                GROUP INVITE DETECTED!
+              </span>{" "}
+              Create your identity to join the group.
+            </p>
           </div>
         )}
 
-        <div className="flex justify-center items-center mt-10">
-          <span className="lg:w-2/5 md:w-2/4 w-full">
-            <div className="text-bandada-gray-light">
-              Users interact with Bandada using a{" "}
-              <a
-                className="space-x-1 text-bandada-gold hover:text-gold-light"
-                href="https://docs.semaphore.pse.dev/guides/identities"
-                target="_blank"
-                rel="noreferrer noopener nofollow"
-              >
-                Semaphore identity
-              </a>{" "}
-              (similar to Ethereum accounts). This identity consists of an{" "}
-              <a
-                className="space-x-1 text-bandada-gold hover:text-gold-light"
-                href="https://github.com/privacy-scaling-explorations/zk-kit/tree/main/packages/eddsa-poseidon"
-                target="_blank"
-                rel="noreferrer noopener nofollow"
-              >
-                EdDSA
-              </a>{" "}
-              public/private key pair and a commitment, used as the public
-              identifier of the identity.
-            </div>
-            <div className="h-px w-full bg-gradient-to-r from-transparent via-bandada-gold/50 to-transparent my-4"></div>
-          </span>
+        <div className="mb-8">
+          <div className="text-white font-mono">
+            Users interact with Bandada using a{" "}
+            <a
+              className="text-bandada-gold hover:text-gold-light underline decoration-dotted"
+              href="https://docs.semaphore.pse.dev/guides/identities"
+              target="_blank"
+              rel="noreferrer noopener nofollow"
+            >
+              Semaphore identity
+            </a>{" "}
+            (similar to Ethereum accounts). This identity consists of an{" "}
+            <a
+              className="text-bandada-gold hover:text-gold-light underline decoration-dotted"
+              href="https://github.com/privacy-scaling-explorations/zk-kit/tree/main/packages/eddsa-poseidon"
+              target="_blank"
+              rel="noreferrer noopener nofollow"
+            >
+              EdDSA
+            </a>{" "}
+            public/private key pair and a commitment, used as the public
+            identifier of the identity.
+          </div>
+          <div className="h-px w-full bg-gradient-to-r from-transparent via-bandada-gold/70 to-transparent my-6"></div>
         </div>
 
-        <div className="flex justify-center items-center mt-5">
+        <div className="flex justify-center items-center mb-8">
           {/* Render identity details or creation button based on state */}
           {identity ? (
             renderIdentity()
@@ -179,15 +191,13 @@ export default function Home() {
         </div>
 
         {justCreated && (
-          <div className="flex justify-center items-center mt-8">
-            <div className="lg:w-2/5 md:w-2/4 w-full flex justify-end">
-              <button
-                className="font-mono bg-bandada-gold hover:bg-gold-light text-bandada-black font-medium rounded-md px-5 py-3 transition-colors duration-200"
-                onClick={handleNext}
-              >
-                Next
-              </button>
-            </div>
+          <div className="flex justify-center mt-8">
+            <button
+              className="font-mono bg-bandada-gold hover:bg-gold-light text-bandada-black font-medium rounded-md px-8 py-3 transition-colors duration-200"
+              onClick={handleNext}
+            >
+              Next
+            </button>
           </div>
         )}
       </div>
