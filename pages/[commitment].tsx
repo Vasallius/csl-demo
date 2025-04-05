@@ -237,7 +237,7 @@ export default function MemberGroups() {
           )}
         </div>
 
-        <CyberDivider />
+        {/* <CyberDivider />
 
         <div className="mt-8 flex flex-col sm:flex-row justify-between space-y-3 sm:space-y-0">
           <button
@@ -252,7 +252,7 @@ export default function MemberGroups() {
           >
             Explore All Groups
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   )
