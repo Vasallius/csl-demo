@@ -110,28 +110,47 @@ export default function InviteButton({
       <button
         onClick={createInvite}
         disabled={loading || !token}
-        className="cyber-btn w-full"
+        className="font-mono bg-bandada-gold hover:bg-gold-light text-bandada-black font-medium rounded-md px-4 py-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading ? (
-          <>
-            <span className="loader mr-2"></span>
+          <span className="flex items-center justify-center">
+            <svg
+              className="animate-spin -ml-1 mr-2 h-4 w-4 text-bandada-black"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
             Creating...
-          </>
+          </span>
         ) : (
           "Create Invite"
         )}
       </button>
 
       {showModal && inviteData && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="cyber-card max-w-md w-full p-6 relative">
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+          <div className="bg-black border-2 border-bandada-gold/70 rounded-md max-w-md w-full p-6 relative shadow-[0_0_30px_rgba(244,215,125,0.15)]">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="font-medium text-xl text-bandada-gold">
+              <h3 className="font-medium text-xl text-bandada-gold font-mono">
                 Invite Ready
               </h3>
               <button
                 onClick={closeModal}
-                className="text-bandada-gray-light hover:text-bandada-gold text-2xl"
+                className="text-white hover:text-bandada-gold text-2xl transition-colors"
                 title="Close"
               >
                 &times;
@@ -139,14 +158,16 @@ export default function InviteButton({
             </div>
 
             <div className="mb-4">
-              <p className="text-sm text-bandada-gold/80 mb-2">Invite Code:</p>
+              <p className="text-sm text-bandada-gold font-mono mb-2">
+                Invite Code:
+              </p>
               <div className="flex items-center space-x-2">
-                <code className="cyber-input flex-grow !bg-bandada-black !cursor-default overflow-x-auto p-2">
+                <code className="flex-grow bg-bandada-black/80 border border-bandada-gold/30 text-white overflow-x-auto p-2 rounded-md font-mono">
                   {inviteData.code}
                 </code>
                 <button
                   onClick={() => copyToClipboard(inviteData.code)}
-                  className="cyber-btn cyber-btn-secondary p-2"
+                  className="bg-bandada-black hover:bg-bandada-gray-dark text-bandada-gold border border-bandada-gold/50 p-2 rounded-md transition-colors"
                   title="Copy code"
                 >
                   <svg
@@ -169,16 +190,16 @@ export default function InviteButton({
 
             {inviteLink && (
               <div className="mb-4">
-                <p className="text-sm text-bandada-gold/80 mb-2">
+                <p className="text-sm text-bandada-gold font-mono mb-2">
                   Invite Link:
                 </p>
                 <div className="flex items-center space-x-2">
-                  <code className="cyber-input flex-grow !bg-bandada-black !cursor-default overflow-x-auto p-2">
+                  <code className="flex-grow bg-bandada-black/80 border border-bandada-gold/30 text-white overflow-x-auto p-2 rounded-md font-mono">
                     {inviteLink}
                   </code>
                   <button
                     onClick={() => copyToClipboard(inviteLink)}
-                    className="cyber-btn cyber-btn-secondary p-2"
+                    className="bg-bandada-black hover:bg-bandada-gray-dark text-bandada-gold border border-bandada-gold/50 p-2 rounded-md transition-colors"
                     title="Copy link"
                   >
                     <svg
@@ -203,16 +224,42 @@ export default function InviteButton({
             <div className="flex justify-end space-x-3 mt-6">
               <button
                 onClick={closeModal}
-                className="cyber-btn cyber-btn-secondary"
+                className="bg-bandada-black hover:bg-bandada-gray-dark text-bandada-gold border border-bandada-gold/50 font-medium rounded-md px-4 py-2 transition-colors duration-200 font-mono"
               >
                 Close
               </button>
               <button
                 onClick={() => createInvite()}
                 disabled={loading}
-                className="cyber-btn"
+                className="font-mono bg-bandada-gold hover:bg-gold-light text-bandada-black font-medium rounded-md px-4 py-2 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? "Creating..." : "New Invite"}
+                {loading ? (
+                  <span className="flex items-center">
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-bandada-black"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Creating...
+                  </span>
+                ) : (
+                  "New Invite"
+                )}
               </button>
             </div>
           </div>
