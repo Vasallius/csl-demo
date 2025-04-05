@@ -102,7 +102,7 @@ export default function InviteButton({
 
   const inviteLink =
     typeof window !== "undefined" && inviteData
-      ? `${window.location.origin}/join?inviteCode=${inviteData.code}`
+      ? `${window.location.origin}/?inviteCode=${inviteData.code}`
       : ""
 
   return (
