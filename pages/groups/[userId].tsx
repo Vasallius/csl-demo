@@ -15,6 +15,11 @@ const apiSdk = new ApiSdk(process.env.NEXT_PUBLIC_BANDADA_API_URL)
 const ADMIN_ID =
   "0x8ecabac8f4348aa9ca192ac200e1ac7c249a55c36a995a99ef49694a885ccc7d"
 
+// Simple styled divider for this page
+const CyberDivider = () => (
+  <hr className="my-5 h-px border-t-0 bg-bandada-gold/30" />
+)
+
 export default function UserGroups() {
   const router = useRouter()
   const { userId } = router.query
@@ -52,6 +57,7 @@ export default function UserGroups() {
 
         if (error) {
           console.error("Error fetching user groups:", error)
+          toast.error("Failed to fetch your groups.")
           setLoading(false)
           return
         }
@@ -63,9 +69,12 @@ export default function UserGroups() {
           // Fetch fresh group data from Bandada API
           const freshGroups = await getGroupsByIds(groupIds)
           setGroups(freshGroups)
+        } else {
+          setGroups([])
         }
       } catch (error) {
         console.error("Error in authentication check:", error)
+        toast.error("An error occurred during authentication check.")
       } finally {
         setLoading(false)
       }
@@ -96,12 +105,21 @@ export default function UserGroups() {
   // }
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push("/login")
+    setLoading(true)
+    try {
+      await supabase.auth.signOut()
+      toast.success("Signed out successfully.")
+      router.push("/login")
+    } catch (error) {
+      console.error("Sign out error:", error)
+      toast.error("Failed to sign out.")
+      setLoading(false)
+    }
   }
 
   const handleCreateGroup = async (data: CreateGroupFormData) => {
     console.log("data", data)
+    const toastId = toast.loading("Creating group...")
     try {
       const {
         data: { session }
@@ -120,65 +138,77 @@ export default function UserGroups() {
       })
 
       if (!response.ok) {
-        throw new Error("Failed to create group")
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || "Failed to create group")
       }
 
       const result = await response.json()
       console.log("result", result)
 
-      // Add the new group's details to the state
-      setGroups((prev) => [...prev, result.group])
+      if (result.group && result.group.id) {
+        setGroups((prev) => [...prev, result.group])
+      } else {
+        console.warn(
+          "Group data missing in API response, refreshing list instead."
+        )
+      }
 
       // Close the modal
       setIsCreateModalOpen(false)
 
       // Show success message
-      toast.success("Group created successfully!")
-    } catch (error) {
+      toast.success("Group created successfully!", { id: toastId })
+    } catch (error: any) {
       console.error("Error creating group:", error)
-      toast.error("Failed to create group. Please try again.")
+      toast.error(`Failed to create group: ${error.message}`, { id: toastId })
     }
   }
 
-  if (loading) {
+  if (loading && groups.length === 0) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="loader-app"></div>
+      <div className="flex justify-center items-center min-h-[calc(100vh-200px)] circuit-pattern">
+        <div className="text-center p-10 bg-bandada-black-light rounded-md border border-bandada-gold/30">
+          <div className="cyber-spinner mx-auto"></div>
+          <p className="mt-4 text-bandada-gold-light">Loading your groups...</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div>
-      <div className="flex justify-center items-center">
-        <h1 className="text-3xl font-semibold text-slate-700">My Groups</h1>
-      </div>
+    <div className="circuit-pattern min-h-[calc(100vh-200px)] py-10">
+      <div className="container mx-auto px-4 max-w-5xl">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
+          <h1 className="text-4xl font-bold text-bandada-gold mb-4 sm:mb-0">
+            My Groups
+          </h1>
+          <button
+            onClick={handleSignOut}
+            className="cyber-btn cyber-btn-secondary text-sm"
+            disabled={loading}
+          >
+            {loading ? <span className="loader mr-2"></span> : null}
+            Sign Out
+          </button>
+        </div>
 
-      <div className="flex justify-end items-center mt-4 px-4 lg:px-8">
-        <button
-          onClick={handleSignOut}
-          className="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-        >
-          Sign Out
-        </button>
-      </div>
+        <CyberDivider />
 
-      <div className="mt-8 px-4 lg:px-8">
-        <div className="bg-pink-100 rounded-lg p-6">
+        <div className="mt-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Create Group Card */}
             <div
               onClick={() => setIsCreateModalOpen(true)}
-              className="bg-white rounded-lg p-6 shadow-md cursor-pointer hover:shadow-lg transition-shadow duration-200 flex flex-col items-center justify-center min-h-[200px]"
+              className="cyber-card cursor-pointer hover:border-bandada-gold-light hover:shadow-[0_0_20px_rgba(244,215,125,0.4)] flex flex-col items-center justify-center min-h-[220px] text-center p-6 transition-all duration-300 group"
             >
-              <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center mb-4">
+              <div className="w-16 h-16 rounded-full bg-bandada-gold/10 border border-bandada-gold/50 flex items-center justify-center mb-4 group-hover:bg-bandada-gold/20 group-hover:border-bandada-gold transition-all duration-300">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="32"
                   height="32"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="white"
+                  stroke="currentColor"
+                  className="text-bandada-gold"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -187,37 +217,52 @@ export default function UserGroups() {
                   <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-gray-900">
+              <h3 className="text-lg font-medium text-bandada-gold group-hover:text-bandada-gold-light transition-colors duration-300">
                 Create New Group
               </h3>
+              <p className="text-sm text-bandada-gold/70 mt-1">
+                Start a new off-chain group
+              </p>
             </div>
 
-            {/* Group Cards */}
             {groups.map((group) => (
               <div
                 key={group.id}
-                className="bg-white rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-200"
+                className="cyber-card flex flex-col justify-between min-h-[220px] p-6"
               >
-                <div className="mb-2">
-                  <span className="inline-block bg-pink-200 text-pink-800 text-xs px-2 py-1 rounded-full">
-                    off-chain
-                  </span>
-                </div>
-                <h3 className="text-lg font-medium text-gray-900">
-                  {group.name}
-                </h3>
-                <p className="text-sm text-gray-500 mb-4">
-                  {group.description}
-                </p>
-                <div className="text-sm text-gray-500 mb-4">
-                  {group.members.length}
-                  <br />
-                  members
+                <div>
+                  <div className="mb-3">
+                    <span className="inline-block bg-bandada-gray text-bandada-gold-light text-xs px-2 py-1 rounded-full border border-bandada-gold/30">
+                      off-chain
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-bold text-bandada-gold mb-1">
+                    {group.name}
+                  </h3>
+                  <p className="text-sm text-bandada-gold-light mb-3 flex-grow">
+                    {group.description || "No description provided."}
+                  </p>
+                  <div className="text-sm text-bandada-gold/80 mb-4">
+                    {group.members?.length ?? "N/A"} members
+                  </div>
                 </div>
 
-                <InviteButton groupId={group.id} />
+                <div className="mt-auto">
+                  <InviteButton groupId={group.id} />
+                </div>
               </div>
             ))}
+
+            {!loading && groups.length === 0 && (
+              <div className="md:col-span-2 lg:col-span-3 text-center py-12 border border-dashed border-bandada-gold/50 rounded-md circuit-pattern">
+                <p className="text-bandada-gold-light">
+                  You haven&apos;t created or joined any groups yet.
+                </p>
+                <p className="text-bandada-gold/80 text-sm mt-1">
+                  Click the &apos;+&apos; card to create your first group.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

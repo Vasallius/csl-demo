@@ -1,8 +1,10 @@
 import supabase from "@/utils/supabaseClient"
 import { useEffect, useState } from "react"
+import { toast } from "react-hot-toast"
 
 type InviteButtonProps = {
   groupId: string
+  className?: string
 }
 
 type InviteResponse = {
@@ -22,19 +24,22 @@ type InviteResponse = {
   }
 }
 
-export default function InviteButton({ groupId }: InviteButtonProps) {
+export default function InviteButton({
+  groupId,
+  className
+}: InviteButtonProps) {
   const [inviteData, setInviteData] = useState<InviteResponse | null>(null)
   const [loading, setLoading] = useState<boolean>(false)
-  const [error, setError] = useState<string | null>(null)
   const [token, setToken] = useState<string | null>(null)
-  const [showInvite, setShowInvite] = useState<boolean>(false)
+  const [showModal, setShowModal] = useState<boolean>(false)
 
-  // Get the auth token when component mounts
   useEffect(() => {
     const getSession = async () => {
       const { data } = await supabase.auth.getSession()
       if (data.session) {
         setToken(data.session.access_token)
+      } else {
+        console.warn("No active session found for creating invites.")
       }
     }
 
@@ -43,14 +48,13 @@ export default function InviteButton({ groupId }: InviteButtonProps) {
 
   const createInvite = async () => {
     if (!token) {
-      setError("You must be logged in to create an invite")
+      toast.error("You must be logged in to create an invite")
       return
     }
 
-    try {
-      setLoading(true)
-      setError(null)
+    setLoading(true)
 
+    try {
       const response = await fetch("/api/create-invite", {
         method: "POST",
         headers: {
@@ -61,15 +65,18 @@ export default function InviteButton({ groupId }: InviteButtonProps) {
       })
 
       if (!response.ok) {
-        const errorData = await response.json()
+        const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.message || "Failed to create invite")
       }
 
       const data = await response.json()
       setInviteData(data)
-      setShowInvite(true)
+      setShowModal(true)
+      toast.success("Invite created!")
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An unknown error occurred")
+      const message =
+        err instanceof Error ? err.message : "An unknown error occurred"
+      toast.error(`Error creating invite: ${message}`)
       console.error("Error creating invite:", err)
     } finally {
       setLoading(false)
@@ -77,95 +84,141 @@ export default function InviteButton({ groupId }: InviteButtonProps) {
   }
 
   const copyToClipboard = (text: string) => {
+    if (!navigator.clipboard) {
+      toast.error("Clipboard access not available or denied.")
+      return
+    }
     navigator.clipboard
       .writeText(text)
       .then(() => {
-        alert("Copied to clipboard!")
+        toast.success("Copied to clipboard!")
       })
       .catch((err) => {
+        toast.error("Failed to copy.")
         console.error("Failed to copy:", err)
       })
   }
 
-  const closeInvite = () => {
-    setShowInvite(false)
+  const closeModal = () => {
+    setShowModal(false)
   }
 
-  const inviteLink = inviteData
-    ? `${window.location.origin}?inviteCode=${inviteData.code}`
-    : ""
+  const inviteLink =
+    typeof window !== "undefined" && inviteData
+      ? `${window.location.origin}/join?inviteCode=${inviteData.code}`
+      : ""
 
   return (
-    <div className="relative">
-      {!showInvite ? (
-        <button
-          onClick={createInvite}
-          disabled={loading || !token}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:bg-blue-300"
-        >
-          {loading ? "Creating..." : "Create Invite"}
-        </button>
-      ) : (
-        <div className="flex space-x-2">
-          <button
-            onClick={closeInvite}
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
-          >
-            Close
-          </button>
-          <button
-            onClick={createInvite}
-            disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:bg-blue-300"
-          >
-            {loading ? "Creating..." : "New Invite"}
-          </button>
-        </div>
-      )}
+    <div className={` ${className || "w-full"} flex flex-col`}>
+      <button
+        onClick={createInvite}
+        disabled={loading || !token}
+        className="cyber-btn w-full"
+      >
+        {loading ? (
+          <>
+            <span className="loader mr-2"></span>
+            Creating...
+          </>
+        ) : (
+          "Create Invite"
+        )}
+      </button>
 
-      {error && <div className="mt-2 text-red-500 text-sm">Error: {error}</div>}
-
-      {showInvite && inviteData && (
-        <div className="mt-4 p-4 border border-gray-200 rounded-md bg-gray-50">
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="font-medium">Invite Created!</h3>
-            <button
-              onClick={closeInvite}
-              className="text-gray-500 hover:text-gray-700"
-              title="Close"
-            >
-              ✕
-            </button>
-          </div>
-
-          <div className="mb-3">
-            <p className="text-sm text-gray-600 mb-1">Invite Code:</p>
-            <div className="flex items-center">
-              <code className="bg-white p-2 rounded border border-gray-300 flex-grow overflow-x-auto">
-                {inviteData.code}
-              </code>
+      {showModal && inviteData && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="cyber-card max-w-md w-full p-6 relative">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-medium text-xl text-bandada-gold">
+                Invite Ready
+              </h3>
               <button
-                onClick={() => copyToClipboard(inviteData.code)}
-                className="ml-2 p-2 bg-gray-200 rounded hover:bg-gray-300"
-                title="Copy code"
+                onClick={closeModal}
+                className="text-bandada-gray-light hover:text-bandada-gold text-2xl"
+                title="Close"
               >
-                📋
+                &times;
               </button>
             </div>
-          </div>
 
-          <div>
-            <p className="text-sm text-gray-600 mb-1">Invite Link:</p>
-            <div className="flex items-center">
-              <code className="bg-white p-2 rounded border border-gray-300 flex-grow overflow-x-auto">
-                {inviteLink}
-              </code>
+            <div className="mb-4">
+              <p className="text-sm text-bandada-gold/80 mb-2">Invite Code:</p>
+              <div className="flex items-center space-x-2">
+                <code className="cyber-input flex-grow !bg-bandada-black !cursor-default overflow-x-auto p-2">
+                  {inviteData.code}
+                </code>
+                <button
+                  onClick={() => copyToClipboard(inviteData.code)}
+                  className="cyber-btn cyber-btn-secondary p-2"
+                  title="Copy code"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {inviteLink && (
+              <div className="mb-4">
+                <p className="text-sm text-bandada-gold/80 mb-2">
+                  Invite Link:
+                </p>
+                <div className="flex items-center space-x-2">
+                  <code className="cyber-input flex-grow !bg-bandada-black !cursor-default overflow-x-auto p-2">
+                    {inviteLink}
+                  </code>
+                  <button
+                    onClick={() => copyToClipboard(inviteLink)}
+                    className="cyber-btn cyber-btn-secondary p-2"
+                    title="Copy link"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end space-x-3 mt-6">
               <button
-                onClick={() => copyToClipboard(inviteLink)}
-                className="ml-2 p-2 bg-gray-200 rounded hover:bg-gray-300"
-                title="Copy link"
+                onClick={closeModal}
+                className="cyber-btn cyber-btn-secondary"
               >
-                📋
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  closeModal()
+                  createInvite()
+                }}
+                disabled={loading}
+                className="cyber-btn"
+              >
+                {loading ? "Creating..." : "New Invite"}
               </button>
             </div>
           </div>
