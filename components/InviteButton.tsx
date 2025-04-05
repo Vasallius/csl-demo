@@ -47,37 +47,34 @@ export default function InviteButton({
   }, [])
 
   const createInvite = async () => {
-    if (!token) {
-      toast.error("You must be logged in to create an invite")
-      return
-    }
-
     setLoading(true)
-
     try {
+      const { data } = await supabase.auth.getSession()
+      if (!data.session) {
+        throw new Error("No session found")
+      }
+
+      setToken(data.session.access_token)
+
       const response = await fetch("/api/create-invite", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${data.session.access_token}`
         },
         body: JSON.stringify({ groupId })
       })
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.message || "Failed to create invite")
+        throw new Error("Failed to create invite")
       }
 
-      const data = await response.json()
-      setInviteData(data)
+      const inviteData = await response.json()
+      setInviteData(inviteData)
       setShowModal(true)
-      toast.success("Invite created!")
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "An unknown error occurred"
-      toast.error(`Error creating invite: ${message}`)
-      console.error("Error creating invite:", err)
+    } catch (error) {
+      console.error("Error creating invite:", error)
+      toast.error("Failed to create invite")
     } finally {
       setLoading(false)
     }
@@ -211,10 +208,7 @@ export default function InviteButton({
                 Close
               </button>
               <button
-                onClick={() => {
-                  closeModal()
-                  createInvite()
-                }}
+                onClick={() => createInvite()}
                 disabled={loading}
                 className="cyber-btn"
               >
