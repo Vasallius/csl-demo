@@ -115,12 +115,9 @@ export default function MemberGroups() {
 
   const navigateToGroup = (groupId: string) => {
     // Decide where clicking a group should lead. To a generic group page?
-    // router.push(`/groups/${groupId}`)
     // For now, let's just log it or perhaps show details if we had them
     console.log("Navigate to group:", groupId)
-    toast(`Group ID: ${groupId} (Navigation placeholder)`, {
-      icon: "ℹ️" // Optional: Add an info icon
-    })
+    router.push(`/group/${groupId}`)
   }
 
   // Loading state for initial identity verification
