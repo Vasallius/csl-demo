@@ -83,24 +83,32 @@ export default function MemberGroups() {
     setJoinLoading(true)
     const toastId = toast.loading("Joining group...")
     try {
-      // Get invite details first to ensure it's valid and get group ID
-      const invite = await apiSdk.getInvite(inviteCode)
-      if (!invite || !invite.group || !invite.group.id) {
-        throw new Error("Invalid invite code or group not found")
-      }
-      const groupId = invite.group.id
+      // Instead of calling Bandada API directly, use our server endpoint
+      // which will handle both joining the group AND updating root_history
+      const response = await fetch("/api/join-with-invite", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          commitment: identity.commitment.toString(),
+          inviteCode: inviteCode
+        })
+      })
 
-      // Now attempt to join
-      await apiSdk.addMemberByInviteCode(
-        groupId,
-        identity.commitment.toString(),
-        inviteCode
-      )
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null)
+        throw new Error(errorData?.message || "Failed to join group")
+      }
+
+      const data = await response.json()
 
       await fetchMemberGroups(identity.commitment.toString()) // Refresh list
       setInviteCode("")
       setShowInviteInput(false)
-      toast.success("Successfully joined the group!", { id: toastId })
+      toast.success(`Successfully joined ${data.groupName || "the group"}!`, {
+        id: toastId
+      })
     } catch (error: any) {
       console.error("Error joining group:", error)
       const message =
@@ -112,7 +120,6 @@ export default function MemberGroups() {
       setJoinLoading(false)
     }
   }
-
   const navigateToGroup = (groupId: string) => {
     // Decide where clicking a group should lead. To a generic group page?
     // For now, let's just log it or perhaps show details if we had them

@@ -4,6 +4,7 @@ import { CreateGroupFormData } from "@/types/group"
 import { getGroupsByIds } from "@/utils/bandadaApi"
 import supabase from "@/utils/supabaseClient"
 import { ApiSdk, type Group as BandadaGroup } from "@bandada/api-sdk"
+import Link from "next/link"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 import { toast } from "react-hot-toast"
@@ -232,7 +233,7 @@ export default function UserGroups() {
             {groups.map((group) => (
               <div
                 key={group.id}
-                className="bg-black/80 border border-bandada-gold/50 hover:border-bandada-gold hover:shadow-[0_0_15px_rgba(244,215,125,0.3)] rounded-md flex flex-col justify-between min-h-[220px] p-6 transition-all duration-300"
+                className="bg-black/80 border border-bandada-gold/50 hover:border-bandada-gold hover:shadow-[0_0_15px_rgba(244,215,125,0.3)] rounded-md flex flex-col justify-between min-h-[240px] p-6 transition-all duration-300"
               >
                 <div>
                   <div className="mb-3">
@@ -251,8 +252,14 @@ export default function UserGroups() {
                   </div>
                 </div>
 
-                <div className="mt-auto">
+                <div className="mt-auto flex flex-col space-y-3">
                   <InviteButton groupId={group.id} />
+
+                  <Link href={`/group/${group.id}/submissions`} legacyBehavior>
+                    <a className="w-full text-center bg-transparent hover:bg-bandada-gold/10 text-bandada-gold border border-bandada-gold/50 font-medium rounded-md px-4 py-2 transition-colors duration-200 font-mono text-sm">
+                      View Submissions
+                    </a>
+                  </Link>
                 </div>
               </div>
             ))}
