@@ -87,37 +87,6 @@ export default function UserGroups() {
     }
   }, [router, userId])
 
-  // Function to set dummy groups data for testing
-  // const setDummyGroups = () => {
-  //   setGroups([
-  //     {
-  //       id: "1",
-  //       name: "Example Group 1",
-  //       description: "This is an example group",
-  //       members: []
-  //     },
-  //     {
-  //       id: "2",
-  //       name: "Example Group 2",
-  //       description: "Another example group",
-  //       members: []
-  //     }
-  //   ])
-  // }
-
-  const handleSignOut = async () => {
-    setLoading(true)
-    try {
-      await supabase.auth.signOut()
-      toast.success("Signed out successfully.")
-      router.push("/login")
-    } catch (error) {
-      console.error("Sign out error:", error)
-      toast.error("Failed to sign out.")
-      setLoading(false)
-    }
-  }
-
   const handleCreateGroup = async (data: CreateGroupFormData) => {
     console.log("data", data)
     const toastId = toast.loading("Creating group...")
@@ -185,16 +154,6 @@ export default function UserGroups() {
           <h1 className="text-4xl font-bold text-bandada-gold mb-4 sm:mb-0 font-mono">
             My Groups
           </h1>
-          <button
-            onClick={handleSignOut}
-            className="bg-black hover:bg-bandada-gray-dark text-bandada-gold border border-bandada-gold/50 font-medium rounded-md px-4 py-2 transition-colors duration-200 font-mono"
-            disabled={loading}
-          >
-            {loading ? (
-              <span className="inline-block animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-bandada-gold mr-2"></span>
-            ) : null}
-            Sign Out
-          </button>
         </div>
 
         <CyberDivider />
