@@ -9,11 +9,6 @@ export default function Header() {
       >
         Anonymous Forms via zk-SNARKs
       </Link>
-      <div className="flex space-x-4 items-center">
-        <Link href="/login" className="cyber-btn-secondary text-sm">
-          Login
-        </Link>
-      </div>
     </header>
   )
 }
