@@ -96,10 +96,36 @@ export default function FormField({ index, onRemove }: FormFieldProps) {
           </label>
           <input
             type="text"
-            {...register(`formFields.${index}.options`)}
+            {...register(`formFields.${index}.options`, {
+              validate: (value) => {
+                if (
+                  fieldType === "single-select" ||
+                  fieldType === "multi-select"
+                ) {
+                  if (!value || value.trim() === "") {
+                    return "Choices cannot be blank."
+                  }
+                  const options = value
+                    .split(",")
+                    .map((opt: string) => opt.trim())
+                    .filter((opt: string) => opt !== "")
+                  if (options.length < 2) {
+                    return "Please enter at least two choices."
+                  }
+                }
+                return true
+              }
+            })}
             placeholder="Option 1, Option 2, Option 3"
             className="w-full p-2 bg-black border border-bandada-gold/50 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-bandada-gold focus:border-transparent font-mono"
           />
+          {errors.formFields &&
+            Array.isArray(errors.formFields) &&
+            errors.formFields[index]?.options && (
+              <p className="mt-1 text-sm text-red-400 font-mono">
+                {(errors.formFields[index]?.options as any).message}
+              </p>
+            )}
         </div>
       )}
 
