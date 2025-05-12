@@ -44,20 +44,20 @@ export default function FormField({ index, onRemove }: FormFieldProps) {
             className="w-full p-2 bg-black border border-bandada-gold/50 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-bandada-gold focus:border-transparent font-mono"
           >
             <option value="text">Text</option>
-            <option value="single-select">Single Select</option>
-            <option value="multi-select">Multi Select</option>
+            <option value="single-select">Multiple Choice</option>
+            <option value="multi-select">Checkbox</option>
             <option value="slider">Slider</option>
           </select>
         </div>
 
         <div>
           <label className="block text-sm font-medium text-bandada-gold font-mono mb-2">
-            Field Label
+            Question
           </label>
           <input
             type="text"
             {...register(`formFields.${index}.label`)}
-            placeholder="Enter field label"
+            placeholder="Enter Question"
             className="w-full p-2 bg-black border border-bandada-gold/50 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-bandada-gold focus:border-transparent font-mono"
           />
         </div>
@@ -77,7 +77,7 @@ export default function FormField({ index, onRemove }: FormFieldProps) {
       {(fieldType === "single-select" || fieldType === "multi-select") && (
         <div className="mt-4">
           <label className="block text-sm font-medium text-bandada-gold font-mono mb-2">
-            Options (comma separated)
+            Choices (comma separated)
           </label>
           <input
             type="text"
