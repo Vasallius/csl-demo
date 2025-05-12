@@ -1,4 +1,3 @@
-import Divider from "@/components/divider"
 import Stepper from "@/components/stepper"
 import { ApiSdk } from "@bandada/api-sdk"
 import { Identity } from "@semaphore-protocol/core"
@@ -84,58 +83,60 @@ export default function JoinGroup() {
   }
 
   return (
-    <div>
+    <div className="bg-bandada-black min-h-screen py-12 px-4">
       <div className="flex justify-center items-center">
-        <h1 className="text-3xl font-semibold text-slate-700">Join Group</h1>
+        <h1 className="text-3xl font-semibold text-bandada-gold font-mono">
+          Join Group
+        </h1>
       </div>
 
       <div className="flex justify-center items-center mt-10">
         <span className="lg:w-2/5 md:w-2/4 w-full">
-          <div>
+          <div className="text-white font-mono">
             You&apos;ve been invited to join a Bandada group. Your identity will
             be added to the group using zero-knowledge proofs, preserving your
             privacy while proving membership.
           </div>
-          <Divider />
+          <div className="h-px w-full bg-gradient-to-r from-transparent via-bandada-gold/70 to-transparent my-6"></div>
         </span>
       </div>
 
       <div className="flex justify-center items-center mt-5">
         <div className="lg:w-2/5 md:w-2/4 w-full">
-          <div className="border-2 p-7 border-slate-300 rounded-md">
+          <div className="border border-bandada-gold/50 bg-black/80 p-7 rounded-md">
             <div className="mb-4">
-              <div className="text-xl font-semibold text-slate-700 mb-2">
+              <div className="text-xl font-semibold text-bandada-gold font-mono mb-2">
                 Invite Code
               </div>
-              <div className="p-2 bg-slate-100 rounded-md overflow-auto">
+              <div className="p-2 bg-black/60 text-white rounded-md overflow-auto border border-bandada-gold/30 font-mono">
                 {inviteCode}
               </div>
             </div>
 
             {identity && (
               <div className="mb-4">
-                <div className="text-xl font-semibold text-slate-700 mb-2">
+                <div className="text-xl font-semibold text-bandada-gold font-mono mb-2">
                   Your Identity Commitment
                 </div>
-                <div className="p-2 bg-slate-100 rounded-md overflow-auto">
+                <div className="p-2 bg-black/60 text-white rounded-md overflow-auto border border-bandada-gold/30 font-mono">
                   {identity.commitment.toString()}
                 </div>
               </div>
             )}
 
             {joinStatus === "error" && (
-              <div className="mb-4 p-3 bg-red-50 text-red-700 border border-red-200 rounded-md">
+              <div className="mb-4 p-3 bg-red-900/50 text-red-300 border border-red-700 rounded-md font-mono">
                 {errorMessage || "Failed to join the group. Please try again."}
               </div>
             )}
 
             {joinStatus === "success" ? (
-              <div className="mb-4 p-3 bg-green-50 text-green-700 border border-green-200 rounded-md">
+              <div className="mb-4 p-3 bg-green-900/50 text-green-300 border border-green-700 rounded-md font-mono">
                 Successfully joined the group! Redirecting to your groups...
               </div>
             ) : (
               <button
-                className="w-full flex justify-center items-center space-x-3 text-lg font-medium rounded-md px-5 py-3 bg-gradient-to-r from-blue-700 to-indigo-700 hover:from-blue-800 hover:to-indigo-800 text-slate-100 disabled:opacity-50"
+                className="w-full flex justify-center items-center space-x-3 text-lg font-medium rounded-md px-5 py-3 bg-bandada-gold hover:bg-gold-light text-bandada-black disabled:opacity-50 font-mono"
                 onClick={handleJoinGroup}
                 disabled={!identity || joinStatus === "loading"}
               >
@@ -147,7 +148,7 @@ export default function JoinGroup() {
       </div>
 
       <div className="flex justify-center items-center mt-10">
-        <div className="lg:w-2/5 md:w-2/4 w-full">
+        <div className="lg:w-2/5 md:w-2/4 w-full text-white font-mono">
           <Stepper
             step={2}
             onPrevClick={() => router.push("/")}

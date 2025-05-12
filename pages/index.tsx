@@ -142,10 +142,12 @@ export default function Home() {
                   />
                 </svg>
               </span>
-              <span className="font-bold text-bandada-gold">
-                GROUP INVITE DETECTED!
-              </span>{" "}
-              Create your identity to join the group.
+              <p>
+                <span className="font-bold text-bandada-gold">
+                  GROUP INVITE DETECTED!
+                </span>{" "}
+                Create your identity to join the group.
+              </p>
             </p>
           </div>
         )}
