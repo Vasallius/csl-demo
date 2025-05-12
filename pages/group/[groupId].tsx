@@ -1,4 +1,4 @@
-import { getGroup, getMembersGroup } from "@/utils/bandadaApi"
+import { getMembersGroup } from "@/utils/bandadaApi"
 import supabase from "@/utils/supabaseClient"
 import { Group, Identity, generateProof } from "@semaphore-protocol/core"
 import { hexlify, toBigInt } from "ethers"
@@ -112,8 +112,8 @@ export default function GroupForm() {
       if (!members) throw new Error("Failed to get group members")
 
       // Get the Bandada group details
-      const bandadaGroup = await getGroup(groupId as string)
-      if (!bandadaGroup) throw new Error("The Bandada group does not exist")
+      // const bandadaGroup = await getGroup(groupId as string)
+      // if (!bandadaGroup) throw new Error("The Bandada group does not exist")
 
       // Create Semaphore group with members
       const semaphoreGroup = new Group(members)

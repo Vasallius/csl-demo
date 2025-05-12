@@ -6,8 +6,16 @@ type FormFieldProps = {
 }
 
 export default function FormField({ index, onRemove }: FormFieldProps) {
-  const { register, watch } = useFormContext()
+  const {
+    register,
+    watch,
+    formState: { errors }
+  } = useFormContext()
   const fieldType = watch(`formFields.${index}.type`)
+  const fieldError =
+    errors.formFields &&
+    Array.isArray(errors.formFields) &&
+    errors.formFields[index]?.label
 
   return (
     <div className="p-4 border border-bandada-gold/40 rounded-md bg-bandada-black/60">
@@ -56,10 +64,17 @@ export default function FormField({ index, onRemove }: FormFieldProps) {
           </label>
           <input
             type="text"
-            {...register(`formFields.${index}.label`)}
+            {...register(`formFields.${index}.label`, {
+              required: "Question cannot be blank"
+            })}
             placeholder="Enter Question"
             className="w-full p-2 bg-black border border-bandada-gold/50 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-bandada-gold focus:border-transparent font-mono"
           />
+          {fieldError && (
+            <p className="mt-1 text-sm text-red-400 font-mono">
+              {fieldError.message}
+            </p>
+          )}
         </div>
       </div>
 
