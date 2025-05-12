@@ -137,10 +137,19 @@ export default function FormField({ index, onRemove }: FormFieldProps) {
             </label>
             <input
               type="number"
-              {...register(`formFields.${index}.min`)}
+              {...register(`formFields.${index}.min`, {
+                required: "This field cannot be blank"
+              })}
               placeholder="0"
               className="w-full p-2 bg-black border border-bandada-gold/50 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-bandada-gold focus:border-transparent font-mono"
             />
+            {errors.formFields &&
+              Array.isArray(errors.formFields) &&
+              errors.formFields[index]?.min && (
+                <p className="mt-1 text-sm text-red-400 font-mono">
+                  {(errors.formFields[index]?.min as any).message}
+                </p>
+              )}
           </div>
           <div>
             <label className="block text-sm font-medium text-bandada-gold font-mono mb-2">
@@ -148,10 +157,19 @@ export default function FormField({ index, onRemove }: FormFieldProps) {
             </label>
             <input
               type="number"
-              {...register(`formFields.${index}.max`)}
+              {...register(`formFields.${index}.max`, {
+                required: "This field cannot be blank"
+              })}
               placeholder="100"
               className="w-full p-2 bg-black border border-bandada-gold/50 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-bandada-gold focus:border-transparent font-mono"
             />
+            {errors.formFields &&
+              Array.isArray(errors.formFields) &&
+              errors.formFields[index]?.max && (
+                <p className="mt-1 text-sm text-red-400 font-mono">
+                  {(errors.formFields[index]?.max as any).message}
+                </p>
+              )}
           </div>
           <div>
             <label className="block text-sm font-medium text-bandada-gold font-mono mb-2">
@@ -159,10 +177,19 @@ export default function FormField({ index, onRemove }: FormFieldProps) {
             </label>
             <input
               type="number"
-              {...register(`formFields.${index}.step`)}
+              {...register(`formFields.${index}.step`, {
+                required: "This field cannot be blank"
+              })}
               placeholder="1"
               className="w-full p-2 bg-black border border-bandada-gold/50 rounded-md text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-bandada-gold focus:border-transparent font-mono"
             />
+            {errors.formFields &&
+              Array.isArray(errors.formFields) &&
+              errors.formFields[index]?.step && (
+                <p className="mt-1 text-sm text-red-400 font-mono">
+                  {(errors.formFields[index]?.step as any).message}
+                </p>
+              )}
           </div>
         </div>
       )}
