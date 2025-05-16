@@ -96,24 +96,31 @@ const SubmissionsPage: NextPage<SubmissionsPageProps> = ({
                 {/* Iterate over form_data object */}
                 {submission.form_data &&
                 typeof submission.form_data === "object" ? (
-                  Object.entries(submission.form_data).map(([key, value]) => (
-                    <div
-                      key={key}
-                      className="flex flex-col md:flex-row md:items-start"
-                    >
-                      <p className="w-full md:w-1/3 font-medium text-bandada-gold font-mono break-words pr-2">
-                        {key}:
-                      </p>
-                      <p className="w-full md:w-2/3 text-white font-mono break-words bg-black/30 px-2 py-1 rounded">
-                        {/* Handle different value types (string, array, etc.) */}
-                        {Array.isArray(value)
-                          ? value.join(", ")
-                          : typeof value === "object"
-                          ? JSON.stringify(value)
-                          : String(value)}
-                      </p>
-                    </div>
-                  ))
+                  Object.entries(submission.form_data)
+                    .sort(([keyA], [keyB]) => {
+                      // Extract numeric part from the beginning of the key
+                      const numA = parseInt(keyA.match(/^\d+/)?.[0] || "0")
+                      const numB = parseInt(keyB.match(/^\d+/)?.[0] || "0")
+                      return numA - numB
+                    })
+                    .map(([key, value]) => (
+                      <div
+                        key={key}
+                        className="flex flex-col md:flex-row md:items-start"
+                      >
+                        <p className="w-full md:w-1/3 font-medium text-bandada-gold font-mono break-words pr-2">
+                          {key}:
+                        </p>
+                        <p className="w-full md:w-2/3 text-white font-mono break-words bg-black/30 px-2 py-1 rounded">
+                          {/* Handle different value types (string, array, etc.) */}
+                          {Array.isArray(value)
+                            ? value.join(", ")
+                            : typeof value === "object"
+                            ? JSON.stringify(value)
+                            : String(value)}
+                        </p>
+                      </div>
+                    ))
                 ) : (
                   <p className="text-gray-400 italic">
                     Invalid form data format.
